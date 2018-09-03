@@ -1,12 +1,12 @@
 package soundnetwork;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
-
 import javax.sound.sampled.*;
 
 import static soundnetwork.Util.CLOCK_IN_MILLIS;
 
 public class Receiver {
+
+    private static final int INTENSITY_THRESHOLD = 3;
 
     private final SourceDataLine sourceLine;
     private final TargetDataLine targetLine;
@@ -23,10 +23,16 @@ public class Receiver {
         result = new StringBuilder();
     }
 
-    public void listen(long timeInMilliseconds) throws InterruptedException {
+    /**
+     * Listens to input sound in real time.
+     *
+     * @param timeInMilliseconds is how much time to be listening
+     */
+    public void listen(long timeInMilliseconds) {
 
         long end = System.currentTimeMillis() + timeInMilliseconds;
 
+        // Avoid function call inside this thread for better performance.
         new Thread(() -> {
             targetLine.start();
             byte[] data = new byte[1];
@@ -43,16 +49,18 @@ public class Receiver {
                 size++;
 
                 if (now >= lap) {
-                    if (isValid(average(sum, size))) {
-                        System.out.print("1");
+
+                    int avg = sum / size;
+                    if (avg <= -INTENSITY_THRESHOLD || avg >= INTENSITY_THRESHOLD) {
+//                        System.out.print("1");
                         result.append("1");
                     } else {
-                        System.out.print("0");
+//                        System.out.print("0");
                         result.append("0");
                     }
                     sum = 0;
                     size = 0;
-                    System.out.println();
+//                    System.out.println();
                     lap = System.currentTimeMillis() + CLOCK_IN_MILLIS;
                 }
                 now = System.currentTimeMillis();
@@ -64,13 +72,12 @@ public class Receiver {
         return value / size;
     }
 
-    public StringBuilder getResult() {
-        return result;
+    private boolean isValid(int data) {
+        return data <= -INTENSITY_THRESHOLD || data >= INTENSITY_THRESHOLD;
     }
 
-    private boolean isValid(int data) {
-        final byte V = 3;
-        return data <= -V || data >= V;
+    public StringBuilder getResult() {
+        return result;
     }
 
     public void close() {
