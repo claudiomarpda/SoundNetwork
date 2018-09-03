@@ -1,70 +1,92 @@
 package soundnetwork;
 
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
+
 import javax.sound.sampled.*;
-import java.io.ByteArrayOutputStream;
+
+import static soundnetwork.Util.CLOCK_IN_MILLIS;
 
 public class Receiver {
 
-    final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-    private final AudioFormat format;
-    private final DataLine.Info sourceInfo;
-    private final DataLine.Info targetInfo;
-    private SourceDataLine sourceLine;
+    private final SourceDataLine sourceLine;
     private final TargetDataLine targetLine;
+    private StringBuilder result;
 
-    public Receiver() throws LineUnavailableException, InterruptedException {
-        format = new AudioFormat(44100, 8, 1, true, false);
-        sourceInfo = new DataLine.Info(SourceDataLine.class, format);
+    public Receiver() throws LineUnavailableException {
+        AudioFormat format = new AudioFormat(190000, 8, 1, true, false);
+        DataLine.Info sourceInfo = new DataLine.Info(SourceDataLine.class, format);
         sourceLine = (SourceDataLine) AudioSystem.getLine(sourceInfo);
         sourceLine.open();
-        targetInfo = new DataLine.Info(TargetDataLine.class, format);
+        DataLine.Info targetInfo = new DataLine.Info(TargetDataLine.class, format);
         targetLine = (TargetDataLine) AudioSystem.getLine(targetInfo);
         targetLine.open();
+        result = new StringBuilder();
     }
 
     public void listen(long timeInMilliseconds) throws InterruptedException {
-        long end = System.currentTimeMillis() + timeInMilliseconds;
-        Thread targetThread = new Thread(() -> {
-            targetLine.start();
-            byte[] data = new byte[targetLine.getBufferSize() / 5];
-            int readBytes;
-            while (System.currentTimeMillis() < end) {
-                readBytes = targetLine.read(data, 0, data.length);
-//                for(int i =0; i < data.length; i++) {
-//                    System.out.println(data[i]);
-//                }
-                outputStream.write(data, 0, readBytes);
-            }
-        });
 
-        System.out.println("RECORDING...");
-        targetThread.start();
-        Thread.sleep(timeInMilliseconds);
-        targetLine.stop();
-        targetLine.close();
+        long end = System.currentTimeMillis() + timeInMilliseconds;
+
+        new Thread(() -> {
+            targetLine.start();
+            byte[] data = new byte[1];
+
+            int size = 0;
+            int sum = 0;
+
+            long lap = System.currentTimeMillis() + CLOCK_IN_MILLIS;
+            long now = 0;
+            do {
+                targetLine.read(data, 0, data.length);
+
+                sum += Math.abs(data[0]);
+                size++;
+
+                if (now >= lap) {
+                    if (isValid(average(sum, size))) {
+                        System.out.print("1");
+                        result.append("1");
+                    } else {
+                        System.out.print("0");
+                        result.append("0");
+                    }
+                    sum = 0;
+                    size = 0;
+                    System.out.println();
+                    lap = System.currentTimeMillis() + CLOCK_IN_MILLIS;
+                }
+                now = System.currentTimeMillis();
+            } while (now < end);
+        }).start();
     }
 
-    public void play(long timeInMilliseconds) throws InterruptedException {
-        long end = System.currentTimeMillis() + timeInMilliseconds;
+    private int average(int value, int size) {
+        return value / size;
+    }
 
-        Thread sourceThread = new Thread(() -> {
-            sourceLine.start();
-            while (System.currentTimeMillis() < end) {
-                sourceLine.write(outputStream.toByteArray(), 0, outputStream.size());
-            }
-        });
-        System.out.println("PLAYING...");
-        sourceThread.start();
-        Thread.sleep(timeInMilliseconds);
-        sourceLine.stop();
+    public StringBuilder getResult() {
+        return result;
+    }
+
+    private boolean isValid(int data) {
+        final byte V = 3;
+        return data <= -V || data >= V;
+    }
+
+    public void close() {
+        targetLine.stop();
+        targetLine.drain();
         sourceLine.close();
+        targetLine.close();
     }
 
     public static void main(String[] args) throws LineUnavailableException, InterruptedException {
         final Receiver receiver = new Receiver();
-        receiver.listen(6000);
-        receiver.play(6000);
+        System.out.println("LISTENING...");
+        receiver.listen(10000);
+        Thread.sleep(10000);
+        receiver.close();
+
     }
 
 }
