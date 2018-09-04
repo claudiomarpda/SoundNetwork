@@ -10,12 +10,12 @@ public class Main {
 
     public static void main(String[] args) throws LineUnavailableException, InterruptedException, IOException, UnsupportedAudioFileException {
 
-        Receiver receiver = new Receiver();
+        Receiver receiver = new Receiver(7);
         Transmitter transmitter = new Transmitter();
 
         System.out.println("LISTENING...");
-        String bits = "1010110011";
-//        String bits = "101010010010001110011";
+//        String bits = "1010110011";
+        String bits = "101010010010001110011";
         receiver.listen(CLOCK_IN_MILLIS * (bits.length() + 1));
 
 
