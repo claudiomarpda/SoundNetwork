@@ -34,10 +34,18 @@ public class NoiseTest {
         targetLine.start();
         byte[] data = new byte[1];
         long end = System.currentTimeMillis() + TIME_IN_MILLIS;
+        int greater = -259;
 
         while (System.currentTimeMillis() < end) {
             targetLine.read(data, 0, data.length);
             System.out.println("Input: " + data[0]);
+
+            int abs = Math.abs(data[0]);
+            if(abs > greater) {
+                greater = abs;
+            }
         }
+
+        System.out.println("Threshold: " + greater);
     }
 }
