@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 
 import static soundnetwork.Util.CLOCK_IN_MILLIS;
+import static soundnetwork.Util.TRANSMISSION_END;
+import static soundnetwork.Util.TRANSMISSION_START;
 
 public class Transmitter {
 
@@ -34,16 +36,19 @@ public class Transmitter {
 
     public static void main(String[] args) throws IOException, UnsupportedAudioFileException, LineUnavailableException, InterruptedException {
         System.out.println("PLAYING...");
-        Thread.sleep(2000);
-        Transmitter t = new Transmitter();
-        String bits = "101010";
+        Transmitter transmitter = new Transmitter();
+        String bits = TRANSMISSION_START + "0101" + "1";
+
         for (int i = 0; i < bits.length(); i++) {
             if (bits.charAt(i) == '1') {
-                t.play(CLOCK_IN_MILLIS);
+                transmitter.play(CLOCK_IN_MILLIS);
             }
             Thread.sleep(CLOCK_IN_MILLIS);
         }
-        t.close();
+
+        Thread.sleep(CLOCK_IN_MILLIS);
+        transmitter.close();
+        System.out.println("\nSent v\n" + bits);
     }
 
 }

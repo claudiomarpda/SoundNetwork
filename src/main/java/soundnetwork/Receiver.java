@@ -48,7 +48,7 @@ public class Receiver {
     public void listen(long timeInMilliseconds) {
 
 
-        SoundDetector soundDetector = new SoundDetector();
+        Detector detector = new Detector();
 
         long end = System.currentTimeMillis() + timeInMilliseconds;
 
@@ -72,24 +72,26 @@ public class Receiver {
                 if (now >= cycle) {
 
                     int avg = sum / size;
+                    // If there is sound
                     if (avg > noiseThreshold) {
-
-                        if(soundDetector.isTransmission()) {
+                        if (detector.isTransmission()) {
                             result.append("1");
-                            System.out.print("1");
+                            detector.addBitOn();
+                        } else {
+                            detector.addBitOn();
+                            detector.checkTransmissionStart();
                         }
-                        else {
-                            soundDetector.addBitOn();
-                        }
+                        System.out.print("1");
                     } else {
-
-                        if(soundDetector.isTransmission()) {
+                        if (detector.isTransmission()) {
                             result.append("0");
-                            System.out.print("0");
+                            detector.addBitOff();
+                            detector.checkTransmissionEnd();
                         }
                         else {
-                            soundDetector.addBitOff();
+                            detector.addBitOff();
                         }
+                        System.out.print("0");
                     }
 
                     sum = 0;
@@ -117,11 +119,22 @@ public class Receiver {
     public static void main(String[] args) throws LineUnavailableException, InterruptedException {
         final Receiver receiver = new Receiver(4);
         System.out.println("LISTENING...");
-        receiver.listen(10000);
-        Thread.sleep(10000);
+        receiver.listen(20000);
+        Thread.sleep(20000);
         receiver.close();
 
-        System.out.println("\n" + receiver.getResult() + "\nReceived ^");
+        String result = receiver.getResult().toString();
+
+        String withoutProtocolEnd = "";
+        for (int i = result.length() - 1; i >= 0; i--) {
+            if (result.charAt(i) == '1') {
+                withoutProtocolEnd = result.substring(0, i);
+                break;
+            }
+        }
+
+        System.out.println("\n" + result + "\nReceived full^");
+        System.out.println("\n" + withoutProtocolEnd + "\nReceived without protocol^");
     }
 
 }
