@@ -2,18 +2,33 @@ package soundnetwork;
 
 import javax.sound.sampled.*;
 
+import static soundnetwork.AudioFormatConfig.*;
 import static soundnetwork.Util.CLOCK_IN_MILLIS;
 
+/**
+ * Receives input sound in real time from a transmitter to decode bits and make communication with sound.
+ * <p>
+ * References:
+ * https://docs.oracle.com/javase/7/docs/api/javax/sound/sampled/AudioFormat.html
+ * https://docs.oracle.com/javase/tutorial/sound/sampled-overview.html
+ */
 public class Receiver {
 
-    private static final int INTENSITY_THRESHOLD = 3;
+    /*
+     * Threshold is the maximum value considered as 'ambient' or 'noisy' sound that you do not want to be captured.
+     * Adjust the threshold according to your microphone sensibility and the output sound from the transmitter.
+     * Analyze your input behaviour in NoisyTest class and set your threshold.
+     */
+    private static final int NOISE_THRESHOLD = 3;
 
     private final SourceDataLine sourceLine;
     private final TargetDataLine targetLine;
     private StringBuilder result;
 
     public Receiver() throws LineUnavailableException {
-        AudioFormat format = new AudioFormat(190000, 8, 1, true, false);
+        // Constructs an AudioFormat with a linear PCM encoding and the given parameters.
+        AudioFormat format = new AudioFormat(SAMPLE_RATE, SAMPLE_SIZE_IN_BITS, CHANNELS, SIGNED, BIG_ENDIAN);
+
         DataLine.Info sourceInfo = new DataLine.Info(SourceDataLine.class, format);
         sourceLine = (SourceDataLine) AudioSystem.getLine(sourceInfo);
         sourceLine.open();
@@ -26,7 +41,7 @@ public class Receiver {
     /**
      * Listens to input sound in real time.
      *
-     * @param timeInMilliseconds is how much time to be listening
+     * @param timeInMilliseconds: how much time to listen
      */
     public void listen(long timeInMilliseconds) {
 
@@ -40,7 +55,7 @@ public class Receiver {
             int size = 0;
             int sum = 0;
 
-            long lap = System.currentTimeMillis() + CLOCK_IN_MILLIS;
+            long cycle = System.currentTimeMillis() + CLOCK_IN_MILLIS;
             long now = 0;
             do {
                 targetLine.read(data, 0, data.length);
@@ -48,10 +63,10 @@ public class Receiver {
                 sum += Math.abs(data[0]);
                 size++;
 
-                if (now >= lap) {
+                if (now >= cycle) {
 
                     int avg = sum / size;
-                    if (avg <= -INTENSITY_THRESHOLD || avg >= INTENSITY_THRESHOLD) {
+                    if (avg >= NOISE_THRESHOLD) {
 //                        System.out.print("1");
                         result.append("1");
                     } else {
@@ -61,19 +76,11 @@ public class Receiver {
                     sum = 0;
                     size = 0;
 //                    System.out.println();
-                    lap = System.currentTimeMillis() + CLOCK_IN_MILLIS;
+                    cycle = System.currentTimeMillis() + CLOCK_IN_MILLIS;
                 }
                 now = System.currentTimeMillis();
             } while (now < end);
         }).start();
-    }
-
-    private int average(int value, int size) {
-        return value / size;
-    }
-
-    private boolean isValid(int data) {
-        return data <= -INTENSITY_THRESHOLD || data >= INTENSITY_THRESHOLD;
     }
 
     public StringBuilder getResult() {
