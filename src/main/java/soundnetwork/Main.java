@@ -14,8 +14,10 @@ public class Main {
         Transmitter transmitter = new Transmitter();
 
         System.out.println("LISTENING...");
+        String transmission = "11100111";
+        String bits = transmission + "10101";
 //        String bits = "1010110011";
-        String bits = "101010010010001110011";
+//        String bits = "101010010010001110011";
         receiver.listen(CLOCK_IN_MILLIS * (bits.length() + 1));
 
 

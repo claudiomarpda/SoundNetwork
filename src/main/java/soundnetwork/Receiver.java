@@ -47,6 +47,9 @@ public class Receiver {
      */
     public void listen(long timeInMilliseconds) {
 
+
+        SoundDetector soundDetector = new SoundDetector();
+
         long end = System.currentTimeMillis() + timeInMilliseconds;
 
         // Avoid function call inside the loop of this thread for better performance
@@ -70,17 +73,30 @@ public class Receiver {
 
                     int avg = sum / size;
                     if (avg > noiseThreshold) {
-                        System.out.print("1");
-                        result.append("1");
+
+                        if(soundDetector.isTransmission()) {
+                            result.append("1");
+                            System.out.print("1");
+                        }
+                        else {
+                            soundDetector.addBitOn();
+                        }
                     } else {
-                        System.out.print("0");
-                        result.append("0");
+
+                        if(soundDetector.isTransmission()) {
+                            result.append("0");
+                            System.out.print("0");
+                        }
+                        else {
+                            soundDetector.addBitOff();
+                        }
                     }
 
                     sum = 0;
                     size = 0;
                     cycle = System.currentTimeMillis() + CLOCK_IN_MILLIS;
                 }
+
                 now = System.currentTimeMillis();
             } while (now < end);
         }).start();
