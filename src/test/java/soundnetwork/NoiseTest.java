@@ -36,6 +36,8 @@ public class NoiseTest {
         long end = System.currentTimeMillis() + TIME_IN_MILLIS;
         int greater = -259;
 
+        int n = 0;
+        long sum = 0;
         while (System.currentTimeMillis() < end) {
             targetLine.read(data, 0, data.length);
             System.out.println("Input: " + data[0]);
@@ -44,8 +46,11 @@ public class NoiseTest {
             if(abs > greater) {
                 greater = abs;
             }
+            n++;
+            sum += abs;
         }
 
-        System.out.println("Threshold: " + greater);
+        System.out.println("Maximum threshold: " + greater);
+        System.out.println("Average threshold: " + sum / n);
     }
 }

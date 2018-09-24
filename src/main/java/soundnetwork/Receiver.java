@@ -4,6 +4,8 @@ import javax.sound.sampled.*;
 
 import static soundnetwork.AudioFormatConfig.*;
 import static soundnetwork.Util.CLOCK_IN_MILLIS;
+import static soundnetwork.Util.TRANSMISSION_END;
+import static soundnetwork.Util.TRANSMISSION_START;
 
 /**
  * Receives input sound in real time from a transmitter to decode bits and make communication with sound.
@@ -19,8 +21,7 @@ public class Receiver {
      * Adjust the threshold according to your microphone sensibility and the output sound from the transmitter.
      * Analyze your input behaviour running NoiseTest class and set your threshold.
      */
-    private int noiseThreshold;
-
+    private final int noiseThreshold;
     private final SourceDataLine sourceLine;
     private final TargetDataLine targetLine;
     private StringBuilder result;
@@ -47,9 +48,6 @@ public class Receiver {
      */
     public void listen(long timeInMilliseconds) {
 
-
-        Detector detector = new Detector();
-
         long end = System.currentTimeMillis() + timeInMilliseconds;
 
         // Avoid function call inside the loop of this thread for better performance
@@ -63,6 +61,9 @@ public class Receiver {
             int size = 0;
             long cycle = System.currentTimeMillis() + CLOCK_IN_MILLIS;
 
+            StringBuilder bits = new StringBuilder("00000000");
+            boolean transmission = false;
+
             do {
                 targetLine.read(data, 0, data.length);
 
@@ -74,23 +75,40 @@ public class Receiver {
                     int avg = sum / size;
                     // If there is sound
                     if (avg > noiseThreshold) {
-                        if (detector.isTransmission()) {
+
+                        // Add 1
+                        bits.append("1");
+                        bits.deleteCharAt(0);
+
+                        if (transmission) {
                             result.append("1");
-                            detector.addBitOn();
                         } else {
-                            detector.addBitOn();
-                            detector.checkTransmissionStart();
+                            // Check start of transmission
+                            transmission = bits.substring(6, 8).equals(TRANSMISSION_START);
                         }
+
                         System.out.print("1");
+
                     } else {
-                        if (detector.isTransmission()) {
+
+                        // Add 0
+                        bits.append("0");
+                        bits.deleteCharAt(0);
+
+                        if (transmission) {
                             result.append("0");
-                            detector.addBitOff();
-                            detector.checkTransmissionEnd();
+
+                            // Check end of transmission
+                            if (bits.toString().equals(TRANSMISSION_END)) {
+                                transmission = false;
+
+                                if(result.length() >= 8) {
+                                    // Delete the transmission end signals
+                                    result.delete(result.length() - 8, result.length());
+                                }
+                            }
                         }
-                        else {
-                            detector.addBitOff();
-                        }
+
                         System.out.print("0");
                     }
 
@@ -105,8 +123,8 @@ public class Receiver {
 
     }
 
-    public StringBuilder getResult() {
-        return result;
+    public String getResult() {
+        return result.toString();
     }
 
     public void close() {
@@ -117,24 +135,14 @@ public class Receiver {
     }
 
     public static void main(String[] args) throws LineUnavailableException, InterruptedException {
-        final Receiver receiver = new Receiver(4);
+        final Receiver receiver = new Receiver(2);
         System.out.println("LISTENING...");
         receiver.listen(20000);
         Thread.sleep(20000);
         receiver.close();
 
-        String result = receiver.getResult().toString();
-
-        String withoutProtocolEnd = "";
-        for (int i = result.length() - 1; i >= 0; i--) {
-            if (result.charAt(i) == '1') {
-                withoutProtocolEnd = result.substring(0, i);
-                break;
-            }
-        }
-
+        String result = receiver.getResult();
         System.out.println("\n" + result + "\nReceived full^");
-        System.out.println("\n" + withoutProtocolEnd + "\nReceived without protocol^");
     }
 
 }

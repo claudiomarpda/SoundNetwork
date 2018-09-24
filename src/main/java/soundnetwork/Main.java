@@ -5,20 +5,19 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 
 import static soundnetwork.Util.CLOCK_IN_MILLIS;
+import static soundnetwork.Util.TRANSMISSION_END;
+import static soundnetwork.Util.TRANSMISSION_START;
 
 public class Main {
 
     public static void main(String[] args) throws LineUnavailableException, InterruptedException, IOException, UnsupportedAudioFileException {
 
-        Receiver receiver = new Receiver(5);
+        Receiver receiver = new Receiver(1);
         Transmitter transmitter = new Transmitter();
 
         System.out.println("LISTENING...");
-        String transmission = "11100111";
-        String bits = transmission + "010101";
-//        String bits = "1010110011";
-//        String bits = "101010010010001110011";
-        receiver.listen(CLOCK_IN_MILLIS * (bits.length() + 1));
+        String bits = TRANSMISSION_START + "0101" + TRANSMISSION_END;
+        receiver.listen(CLOCK_IN_MILLIS * (bits.length() + 2));
 
 
         System.out.println("PLAYING...");

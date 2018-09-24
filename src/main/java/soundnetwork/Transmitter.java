@@ -37,13 +37,14 @@ public class Transmitter {
     public static void main(String[] args) throws IOException, UnsupportedAudioFileException, LineUnavailableException, InterruptedException {
         System.out.println("PLAYING...");
         Transmitter transmitter = new Transmitter();
-        String bits = TRANSMISSION_START + "0101" + "1";
+        String bits = TRANSMISSION_START + "0101" + TRANSMISSION_END;
 
         for (int i = 0; i < bits.length(); i++) {
             if (bits.charAt(i) == '1') {
                 transmitter.play(CLOCK_IN_MILLIS);
+            }else {
+                Thread.sleep(CLOCK_IN_MILLIS);
             }
-            Thread.sleep(CLOCK_IN_MILLIS);
         }
 
         Thread.sleep(CLOCK_IN_MILLIS);
