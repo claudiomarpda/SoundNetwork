@@ -60,8 +60,9 @@ public class Receiver {
             int sum = 0;
             int size = 0;
             long cycle = System.currentTimeMillis() + CLOCK_IN_MILLIS;
-            long shortCycle = System.currentTimeMillis() + CLOCK_IN_MILLIS / 5;
+            long shortCycle = System.currentTimeMillis() + 200;
 
+            String last = "0";
             StringBuilder bits = new StringBuilder("00000000");
             boolean transmission = false;
 
@@ -71,21 +72,32 @@ public class Receiver {
                 sum += Math.abs(data[0]);
                 size++;
 
-                if (now >= shortCycle) {
+//                if (now >= shortCycle) {
+                    int avg = sum / size;
                     if (!transmission) {
-                        int avg = sum / size;
                         // If there is sound
                         if (avg > noiseThreshold) {
                             transmission = true;
                             // Updates the time to start transmission now
                             now = cycle + 1;
-                            continue;
                         }
                     }
-                }
+//                    else {
+//                        String current = avg > noiseThreshold ? "1" : "0";
+//                        if(!last.equals(current)) {
+//                            result.append(current);
+//                            bits.deleteCharAt(0);
+//                            last = current;
+//                            System.out.print(current);
+//                            cycle = System.currentTimeMillis() + CLOCK_IN_MILLIS;
+//                            now = cycle + 1;
+//                        }
+//                    }
+//                    shortCycle = System.currentTimeMillis() + 200;
+//                }
                 if (now >= cycle) {
 
-                    int avg = sum / size;
+                     avg = sum / size;
                     // If there is sound
                     if (avg > noiseThreshold) {
 
@@ -95,6 +107,7 @@ public class Receiver {
 
                         if (transmission) {
                             result.append("1");
+                            last = "1";
                             System.out.print("1");
                         } else {
                             // Check start of transmission
@@ -109,6 +122,7 @@ public class Receiver {
 
                         if (transmission) {
                             result.append("0");
+                            last = "0";
                             System.out.print("0");
 
                             // Check end of transmission
@@ -122,9 +136,7 @@ public class Receiver {
                     size = 0;
                     cycle = System.currentTimeMillis() + CLOCK_IN_MILLIS;
                 }
-
                 now = System.currentTimeMillis();
-                shortCycle = now;
             } while (now < end);
         }).start();
 
@@ -135,7 +147,7 @@ public class Receiver {
             // Delete the transmission end signals
             result.delete(result.length() - 8, result.length());
             // Delete the transmission start signals
-            result.delete(0, 3);
+            result.delete(0, 2);
         }
         return result.toString();
     }
@@ -148,7 +160,7 @@ public class Receiver {
     }
 
     public static void main(String[] args) throws LineUnavailableException, InterruptedException {
-        final Receiver receiver = new Receiver(5);
+        final Receiver receiver = new Receiver(4);
         System.out.println("LISTENING...");
         receiver.listen(20000);
         Thread.sleep(20000);

@@ -12,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) throws LineUnavailableException, InterruptedException, IOException, UnsupportedAudioFileException {
 
-        Receiver receiver = new Receiver(5);
+        Receiver receiver = new Receiver(4);
         Transmitter transmitter = new Transmitter();
 
         System.out.println("LISTENING...");
