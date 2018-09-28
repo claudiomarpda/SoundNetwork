@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import javax.sound.sampled.*;
 
-import static soundnetwork.AudioFormatConfig.*;
+import static soundnetwork.physical.AudioFormatConfig.*;
 
 /**
  * Noise test for finding out the sound threshold of a particular ambient and microphone sensibility.

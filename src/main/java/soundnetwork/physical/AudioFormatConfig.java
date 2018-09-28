@@ -1,4 +1,4 @@
-package soundnetwork;
+package soundnetwork.physical;
 
 public interface AudioFormatConfig {
 

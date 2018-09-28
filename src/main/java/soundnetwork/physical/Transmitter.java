@@ -1,12 +1,12 @@
-package soundnetwork;
+package soundnetwork.physical;
 
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
 
-import static soundnetwork.Util.CLOCK_IN_MILLIS;
-import static soundnetwork.Util.TRANSMISSION_END;
-import static soundnetwork.Util.TRANSMISSION_START;
+import static soundnetwork.physical.Util.CLOCK_IN_MILLIS;
+import static soundnetwork.physical.Util.TRANSMISSION_END;
+import static soundnetwork.physical.Util.TRANSMISSION_START;
 
 public class Transmitter {
 
