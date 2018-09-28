@@ -60,7 +60,8 @@ public class Receiver {
             int sum = 0;
             int size = 0;
             long cycle = System.currentTimeMillis() + CLOCK_IN_MILLIS;
-            long shortCycle = System.currentTimeMillis() + 200;
+            long shortCycle = System.currentTimeMillis() + 50;
+            boolean refreshed = true;
 
             String last = "0";
             StringBuilder bits = new StringBuilder("00000000");
@@ -72,32 +73,30 @@ public class Receiver {
                 sum += Math.abs(data[0]);
                 size++;
 
-//                if (now >= shortCycle) {
+                if (now >= shortCycle) {
                     int avg = sum / size;
                     if (!transmission) {
                         // If there is sound
                         if (avg > noiseThreshold) {
                             transmission = true;
-                            // Updates the time to start transmission now
+                            // Update the time to start transmission now
                             now = cycle + 1;
                         }
+                    } else {
+                        String current = avg > noiseThreshold ? "1" : "0";
+                        if (!current.equals(last)) {
+                            if (!refreshed) {
+                                // Update the time now
+                                now = cycle + 1;
+                                refreshed = true;
+                            }
+                        }
                     }
-//                    else {
-//                        String current = avg > noiseThreshold ? "1" : "0";
-//                        if(!last.equals(current)) {
-//                            result.append(current);
-//                            bits.deleteCharAt(0);
-//                            last = current;
-//                            System.out.print(current);
-//                            cycle = System.currentTimeMillis() + CLOCK_IN_MILLIS;
-//                            now = cycle + 1;
-//                        }
-//                    }
-//                    shortCycle = System.currentTimeMillis() + 200;
-//                }
+                    shortCycle = System.currentTimeMillis() + 50;
+                }
                 if (now >= cycle) {
 
-                     avg = sum / size;
+                    int avg = sum / size;
                     // If there is sound
                     if (avg > noiseThreshold) {
 
@@ -106,6 +105,8 @@ public class Receiver {
                         bits.deleteCharAt(0);
 
                         if (transmission) {
+                            bits.append("1");
+                            bits.deleteCharAt(0);
                             result.append("1");
                             last = "1";
                             System.out.print("1");
@@ -135,6 +136,7 @@ public class Receiver {
                     sum = 0;
                     size = 0;
                     cycle = System.currentTimeMillis() + CLOCK_IN_MILLIS;
+                    refreshed = false;
                 }
                 now = System.currentTimeMillis();
             } while (now < end);
@@ -160,7 +162,7 @@ public class Receiver {
     }
 
     public static void main(String[] args) throws LineUnavailableException, InterruptedException {
-        final Receiver receiver = new Receiver(4);
+        final Receiver receiver = new Receiver(6);
         System.out.println("LISTENING...");
         receiver.listen(20000);
         Thread.sleep(20000);

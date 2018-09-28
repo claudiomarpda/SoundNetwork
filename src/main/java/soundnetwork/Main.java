@@ -12,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) throws LineUnavailableException, InterruptedException, IOException, UnsupportedAudioFileException {
 
-        Receiver receiver = new Receiver(4);
+        Receiver receiver = new Receiver(6);
         Transmitter transmitter = new Transmitter();
 
         System.out.println("LISTENING...");
@@ -24,6 +24,7 @@ public class Main {
         for (char c : bits.toCharArray()) {
             if (c == '1') {
                 transmitter.play(CLOCK_IN_MILLIS);
+                Thread.sleep(100);
             }
             else {
                 Thread.sleep(CLOCK_IN_MILLIS);
@@ -33,7 +34,7 @@ public class Main {
         Thread.sleep(CLOCK_IN_MILLIS);
         receiver.close();
         transmitter.close();
-        System.out.println("\nSent v\n" + bits);
+        System.out.println("\nSent v\n" + bits + "\n");
         System.out.println(receiver.getResult() + "\nReceived ^");
     }
 }
