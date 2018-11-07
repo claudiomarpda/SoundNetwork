@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import javax.sound.sampled.*;
 
-import static soundnetwork.AudioFormatConfig.*;
+import static soundnetwork.physical.AudioFormatConfig.*;
 
 /**
  * Noise test for finding out the sound threshold of a particular ambient and microphone sensibility.
@@ -34,10 +34,23 @@ public class NoiseTest {
         targetLine.start();
         byte[] data = new byte[1];
         long end = System.currentTimeMillis() + TIME_IN_MILLIS;
+        int greater = -259;
 
+        int n = 0;
+        long sum = 0;
         while (System.currentTimeMillis() < end) {
             targetLine.read(data, 0, data.length);
             System.out.println("Input: " + data[0]);
+
+            int abs = Math.abs(data[0]);
+            if(abs > greater) {
+                greater = abs;
+            }
+            n++;
+            sum += abs;
         }
+
+        System.out.println("Maximum threshold: " + greater);
+        System.out.println("Average threshold: " + sum / n);
     }
 }
