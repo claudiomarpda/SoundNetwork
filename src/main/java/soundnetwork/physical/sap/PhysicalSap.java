@@ -2,6 +2,8 @@ package soundnetwork.physical.sap;
 
 public interface PhysicalSap {
 
-    void start();
+    void receive();
+
+    void transmit(String bits);
 
 }

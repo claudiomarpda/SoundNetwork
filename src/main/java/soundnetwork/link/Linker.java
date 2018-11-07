@@ -1,5 +1,7 @@
 package soundnetwork.link;
 
+import soundnetwork.physical.sap.PhysicalSap;
+
 import static soundnetwork.link.Linker.FrameState.*;
 
 public class Linker implements LinkerSap {
@@ -9,6 +11,8 @@ public class Linker implements LinkerSap {
     enum FrameState {
         SOURCE, DEST, PAYLOAD, END
     }
+
+    private PhysicalSap physicalSap;
 
     private String bits;
     private FrameState state;
@@ -54,5 +58,16 @@ public class Linker implements LinkerSap {
             frame = new Frame();
         }
 
+    }
+
+    @Override
+    public void transmit(String bits) {
+        for(int i = 0; i < bits.length(); i++) {
+            physicalSap.transmit(String.valueOf(bits.charAt(i)));
+        }
+    }
+
+    public void setPhysicalSap(PhysicalSap physicalSap) {
+        this.physicalSap = physicalSap;
     }
 }

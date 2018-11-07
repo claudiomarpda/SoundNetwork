@@ -3,14 +3,14 @@ package soundnetwork;
 import soundnetwork.link.Linker;
 import soundnetwork.link.LinkerSap;
 import soundnetwork.physical.sap.PhysicalSap;
-import soundnetwork.physical.sap.StaticReader;
+import soundnetwork.physical.sap.FileSap;
 
-public class Main {
+public class ReceiverApp {
 
     public static void main(String[] args) {
         LinkerSap linkerSap = new Linker();
-        PhysicalSap physicalSap = new StaticReader(linkerSap);
-        physicalSap.start();
+        PhysicalSap physicalSap = new FileSap(linkerSap);
+        physicalSap.receive();
     }
 
 }
