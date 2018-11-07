@@ -1,9 +1,9 @@
-package soundnetwork;
+package soundnetwork.physical;
 
 import javax.sound.sampled.*;
 
-import static soundnetwork.AudioFormatConfig.*;
-import static soundnetwork.Util.CLOCK_IN_MILLIS;
+import static soundnetwork.physical.AudioFormatConfig.*;
+import static soundnetwork.physical.Util.CLOCK_IN_MILLIS;
 
 /**
  * Receives input sound in real time from a transmitter to decode bits and make communication with sound.

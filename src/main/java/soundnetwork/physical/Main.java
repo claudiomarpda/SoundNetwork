@@ -1,10 +1,10 @@
-package soundnetwork;
+package soundnetwork.physical;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 
-import static soundnetwork.Util.CLOCK_IN_MILLIS;
+import static soundnetwork.physical.Util.CLOCK_IN_MILLIS;
 
 public class Main {
 
@@ -15,7 +15,7 @@ public class Main {
 
         System.out.println("LISTENING...");
 //        String bits = "1010110011";
-        String bits = "101010010010001110011";
+        String bits = "010101";
         receiver.listen(CLOCK_IN_MILLIS * (bits.length() + 1));
 
 
