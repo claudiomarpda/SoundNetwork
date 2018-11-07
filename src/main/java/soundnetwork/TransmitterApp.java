@@ -2,6 +2,7 @@ package soundnetwork;
 
 import soundnetwork.link.Linker;
 import soundnetwork.link.LinkerSap;
+import soundnetwork.network.NetWork;
 import soundnetwork.physical.sap.FileSap;
 import soundnetwork.physical.sap.PhysicalSap;
 
@@ -12,7 +13,7 @@ import java.nio.file.Paths;
 public class TransmitterApp {
 
     public static void main(String[] args) {
-        LinkerSap linkerSap = new Linker();
+        LinkerSap linkerSap = new Linker(new NetWork());
         PhysicalSap physicalSap = new FileSap(linkerSap);
 
         try {
