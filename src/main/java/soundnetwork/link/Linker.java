@@ -62,9 +62,7 @@ public class Linker implements LinkerSap {
 
     @Override
     public void transmit(String bits) {
-        for(int i = 0; i < bits.length(); i++) {
-            physicalSap.transmit(String.valueOf(bits.charAt(i)));
-        }
+        physicalSap.transmit(String.valueOf(bits));
     }
 
     public void setPhysicalSap(PhysicalSap physicalSap) {
